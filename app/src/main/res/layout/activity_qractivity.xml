@@ -4,96 +4,121 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/home_bg"
     tools:context=".ui.qrScanner.QRActivity">
 
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/scanQrCode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="Scan QR Code"
-        android:textColor="@color/white"
-        android:textSize="25sp"
-        app:fontFamily="@font/rubrik_bold_g"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
+    <SurfaceView
+        android:id="@+id/cameraSurfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.card.MaterialCardView
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/qr_border"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25dp"
+        app:layout_constraintBottom_toTopOf="@+id/materialCardView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/qr_border" />
+
+
+    <View
+        android:id="@+id/barcode_line"
+        android:layout_width="300dp"
+        android:layout_height="4dp"
+        android:background="#58B2BB"
+        app:layout_constraintBottom_toBottomOf="@+id/qr_border"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/qr_border" />
+
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/materialCardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        app:cardBackgroundColor="#E1E1E1"
-        app:layout_constraintTop_toBottomOf="@+id/scanQrCode"
-        tools:layout_editor_absoluteX="20dp">
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/placeDevice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10sp"
-            android:gravity="center"
-            android:text="Place the Device the Center of QR Code of Your Machine, The Device Will Automatic Connect to your Machine view Bluetooth"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            app:fontFamily="@font/poppins_regular" />
-
-
-    </com.google.android.material.card.MaterialCardView>
-
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_margin="20dp"
-        app:cardCornerRadius="15sp"
-        app:layout_constraintTop_toBottomOf="@+id/materialCardView"
-        tools:layout_editor_absoluteX="20dp">
-        <SurfaceView
-            android:id="@+id/cameraSurfaceView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleX="2"
-            android:scaleY="2"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:id="@+id/barcode_line"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:background="#951C1C"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-    </androidx.cardview.widget.CardView>
-
-
-    <Button
-        android:id="@+id/btnScan"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/white"
-        android:text="Scan QR Code"
-        android:fontFamily="@font/poppins_regular"
-        android:layout_marginTop="20dp"
-        android:textColor="@color/black"
-        android:textSize="22sp"
+        android:background="@drawable/bg_round2"
+        android:paddingBottom="30dp"
+        app:cardCornerRadius="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/mScan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text="Scan any QR code to pay"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:fontFamily="@font/poppins_medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteY="16dp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/mDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Google Pay * PhonePePayTm * UPI"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:fontFamily="@font/poppins_regular"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mScan"
+            tools:layout_editor_absoluteY="16dp" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/gray"
+            app:layout_constraintTop_toBottomOf="@+id/mDesc" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/qrScanner"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view"
+            app:srcCompat="@drawable/qr_code" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/mMachine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Scan any QR code machine"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:fontFamily="@font/poppins_medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/qrScanner"
+            tools:layout_editor_absoluteY="16dp" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

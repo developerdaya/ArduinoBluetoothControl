@@ -44,155 +44,15 @@ class QRActivity : AppCompatActivity() {
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private val foundDevices = StringBuilder()
     companion object { private const val REQUEST_CODE_NEARBY_DEVICES_PERMISSION = 101 }
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQractivityBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            requestBluetoothScanPermission()
-        }
-        if (ContextCompat.checkSelfPermission(
-                this@QRActivity, android.Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            askForCameraPermission()
-        } else {
-            setupControls()
-        }
-        val aniSlide: Animation = AnimationUtils.loadAnimation(this@QRActivity, R.anim.scanner_animation)
-        binding.barcodeLine.startAnimation(aniSlide)
-        initControl()
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-
-        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-        registerReceiver(receiver, filter)
-
-
+        setupControls()
     }
 
-    private fun requestBluetoothScanPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-        {
-            when {
-                ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED ->
-                {
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_SCAN), REQUEST_CODE_NEARBY_DEVICES_PERMISSION)
-                }
-            }
-        }
-    }
-
-
-
-
-
-
-
-    fun initControl()
-    {
-        binding.scanQrCode.setOnClickListener {
-            val deviceAddressSpeaker = "01:B6:EC:DB:45:B9"
-            val device: BluetoothDevice? = bluetoothAdapter.getRemoteDevice(deviceAddressSpeaker)
-            device?.let {
-                if (it.bondState == BluetoothDevice.BOND_BONDED) {
-                    unpairDevice(it)
-                    showToast("Unpaired")
-                }
-                else{
-                    showToast("Pared")
-
-                }
-            }
-        }
-
-        binding.btnScan.setOnClickListener {
-            if (isParedWithDevice)
-            {
-                moveActivityData(deviceName,HomeActivity())
-
-            }
-            else{
-                showToast("1st Paired with Device")
-            }
-        }
-    }
-    private fun unpairDevice(device: BluetoothDevice) {
-        try {
-            // Correctly specify that removeBond takes no parameters by passing an empty array
-            val method = device.javaClass.getMethod("removeBond", *arrayOf<Class<*>>())
-            method.invoke(device)
-            showToast("Device Disconnected successfully")
-            isParedWithDevice = false
-        } catch (e: Exception) {
-            e.printStackTrace()
-            showToast("Unpairing failed")
-        }
-    }
-    private fun createBondWithDevice(device: BluetoothDevice) {
-        val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-        registerReceiver(receiver, filter)
-        device.createBond()
-    }
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(receiver)
-        cameraSource.stop()
-
-    }
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val action: String? = intent.action
-            if (BluetoothDevice.ACTION_FOUND == action) {
-                // Get the BluetoothDevice object from the Intent
-                val device: BluetoothDevice? =
-                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                    val deviceName1 = device?.name ?: "Unknown Device"
-                deviceName = deviceName1
-                val deviceHardwareAddress = device?.address
-                foundDevices.append("$deviceName1 - $deviceHardwareAddress\n")
-                // Update the TextView
-                //   binding.batterySRNo.text = foundDevices.toString()
-                Log.d("Daya", "onReceive: $foundDevices")
-
-            }
-
-            if (BluetoothDevice.ACTION_BOND_STATE_CHANGED == action) {
-                val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                val bondState =
-                    intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR)
-
-                when (bondState) {
-                    BluetoothDevice.BOND_BONDED -> {
-                        deviceName = device?.name.toString()
-                        showToast("connected with $deviceName")
-                        unregisterReceiver(this)
-                        showToast("Device Connected")
-                        isParedWithDevice = true
-                    }
-
-                    BluetoothDevice.BOND_NONE -> {
-                        // Pairing failed or the device is not paired
-                        showToast("Device Connected failed")
-                        isParedWithDevice = false
-
-                    }
-                }
-            }
-        }
-
-    }
-
-
-
-
-
-
-
-    fun setupControls()
+        fun setupControls()
     {
         barcodeDetector = BarcodeDetector.Builder(this).setBarcodeFormats(Barcode.ALL_FORMATS).build()
         cameraSource = CameraSource.Builder(this, barcodeDetector)
@@ -252,7 +112,7 @@ class QRActivity : AppCompatActivity() {
                         val device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice(deviceAddressSpeaker)
                         device?.let {
                             if (it.bondState != BluetoothDevice.BOND_BONDED) {
-                                createBondWithDevice(it)
+                                //createBondWithDevice(it)
                             } else {
                                 runOnUiThread {
                                     showToast("Bluetooth Already Paired")
