@@ -28,7 +28,7 @@ fun Activity.moveActivityData(msg:String,activity: Activity){
 
 
 fun Activity.showToast(msg:String){
- Toast.makeText(this,msg,Toast.LENGTH_LONG).show()
+ Toast.makeText(this,msg,Toast.LENGTH_SHORT).show()
 }
 
 
