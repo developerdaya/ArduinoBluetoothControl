@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.widget.Toast
@@ -24,6 +25,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.curiousdaya.bmsanalyser.databinding.ActivityQractivityBinding
 import com.curiousdaya.bmsanalyser.databinding.PermissionDialogLayoutBinding
+import com.curiousdaya.bmsanalyser.ui.home.HomeActivity
+import com.curiousdaya.bmsanalyser.util.Prefs
+import com.curiousdaya.bmsanalyser.util.moveActivity
 import com.curiousdaya.bmsanalyser.util.showToast
 import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
@@ -33,6 +37,7 @@ import java.io.IOException
 
 
 class QRActivity : AppCompatActivity() {
+    //01:B6:EC:DB:45:B9 SPEAKER
     private lateinit var cameraSource: CameraSource
     private lateinit var barcodeDetector: BarcodeDetector
     private var scannedValue = ""
@@ -46,16 +51,26 @@ class QRActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
         registerReceiver(bluetoothStateReceiver, filter)
-    }
-    override fun onPause() {
-        super.onPause()
-        // Unregister the BroadcastReceiver when the activity is not visible
-        unregisterReceiver(bluetoothStateReceiver)
+        requestPermissionMySelf()
+        if (checkPermissions()) {
+            if (bluetoothAdapter.isEnabled)
+            {
+                setupQrScanner()
+            } else
+            {
+                enableBlueTooth()
+            }
+        } else {
+            requestPermissionMySelf()
+        }
+        initControl()
     }
 
-    // Define the BroadcastReceiver as an inner class
+
+
     private val bluetoothStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             val action: String? = intent.action
@@ -64,16 +79,16 @@ class QRActivity : AppCompatActivity() {
                 val state: Int = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
                 when (state) {
                     BluetoothAdapter.STATE_OFF -> {
-                        if (checkPermissions())
-                        {
+                        if (checkPermissions()) {
                             enableBlueTooth()
                             showToast("It is nessary to turn on bluetooth, Please enable it.")
-                        }
-                        else
-                        {
+                        } else {
                             requestPermissionMySelf()
                         }
-                    }}}}
+                    }
+                }
+            }
+        }
     }
 
 
@@ -82,18 +97,45 @@ class QRActivity : AppCompatActivity() {
         binding = ActivityQractivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
         window.setFlags(512, 512)
-        requestPermissionMySelf()
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        if (checkPermissions())
-        {
-           enableBlueTooth()
+
+
+    }
+
+
+
+    private fun initControl() {
+        binding.mUnpairDevices.setOnClickListener {
+            unpairAllDevices()
         }
-        else
+    }
+
+    fun unpairAllDevices() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED)
         {
-            requestPermissionMySelf()
+            val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+            val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
+            pairedDevices?.forEach { device -> unpairDevice(device) }
         }
 
     }
+
+    private fun unpairDevice(device: BluetoothDevice) {
+        try {
+            val method = device.javaClass.getMethod("removeBond")
+            method.invoke(device)
+        } catch (exception: Exception) { Log.e("UnpairDevice", "Could not unpair device: ", exception) }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::cameraSource.isInitialized) {
+            cameraSource.stop()
+        }
+        if (::bluetoothAdapter.isInitialized) {
+            unregisterReceiver(bluetoothStateReceiver)
+        }
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -102,11 +144,11 @@ class QRActivity : AppCompatActivity() {
         }
         if (requestCode == REQUEST_BLUETOOTH) {
             if (resultCode == RESULT_OK) {
-            } else {
-                // User denied to enable Bluetooth or error occurred
+            } else
+            {
                 showToast("It is nessary to turn on bluetooth, Please enable it.")
                 if (checkPermissions())
-                 enableBlueTooth()
+                    enableBlueTooth()
             }
         }
     }
@@ -114,8 +156,10 @@ class QRActivity : AppCompatActivity() {
 
     fun enableBlueTooth() {
         if (bluetoothAdapter != null) {
-            if (!bluetoothAdapter.isEnabled) {
+            if (!bluetoothAdapter.isEnabled)
+            {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) { return }
                 startActivityForResult(enableBtIntent, REQUEST_BLUETOOTH)
             }
         }
@@ -187,38 +231,42 @@ class QRActivity : AppCompatActivity() {
                 }
             }
 
-            if (allPermissionsGranted)
-            {
-                if (checkPermissions())
-                { enableBlueTooth()}
-            }
-            else
-            {
+            if (allPermissionsGranted) {
+                if (checkPermissions()) {
+                    enableBlueTooth()
+                }
+            } else {
                 showSettingsDialog(this)
             }
         }
     }
 
-    fun setupControls() {
+    fun setupQrScanner() {
         barcodeDetector =
             BarcodeDetector.Builder(this).setBarcodeFormats(Barcode.ALL_FORMATS).build()
         cameraSource =
             CameraSource.Builder(this, barcodeDetector).setRequestedPreviewSize(1920, 1080)
-                .setAutoFocusEnabled(true) //you should add this feature
+                .setAutoFocusEnabled(true)
                 .build()
 
         binding.cameraSurfaceView.getHolder().addCallback(object : SurfaceHolder.Callback {
-            @SuppressLint("MissingPermission")
             override fun surfaceCreated(holder: SurfaceHolder) {
-                try {
-                    //Start preview after 1s delay
-                    cameraSource.start(holder)
-                } catch (e: IOException) {
-                    e.printStackTrace()
+                if (checkPermissions()) {
+                    try {
+                        if (ActivityCompat.checkSelfPermission(
+                                this@QRActivity,
+                                Manifest.permission.CAMERA
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            return
+                        }
+                        cameraSource.start(holder)
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
                 }
             }
 
-            @SuppressLint("MissingPermission")
             override fun surfaceChanged(
                 holder: SurfaceHolder,
                 format: Int,
@@ -226,6 +274,13 @@ class QRActivity : AppCompatActivity() {
                 height: Int
             ) {
                 try {
+                    if (ActivityCompat.checkSelfPermission(
+                            this@QRActivity,
+                            Manifest.permission.CAMERA
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        return
+                    }
                     cameraSource.start(holder)
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -233,49 +288,104 @@ class QRActivity : AppCompatActivity() {
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder) {
-                cameraSource.stop()
+              //  cameraSource.stop()
             }
         })
 
 
         barcodeDetector.setProcessor(object : Detector.Processor<Barcode> {
             override fun release() {
-                Toast.makeText(applicationContext, "Scanner has been closed", Toast.LENGTH_SHORT)
-                    .show()
             }
 
             override fun receiveDetections(detections: Detector.Detections<Barcode>) {
                 val barcodes = detections.detectedItems
                 if (barcodes.size() == 1) {
                     scannedValue = barcodes.valueAt(0).rawValue
-
-
-                    //Don't forget to add this line printing value or finishing activity must run on main thread
                     runOnUiThread {
                         Handler().postDelayed({
-                            cameraSource.stop()
-                        },5000)
+                           // cameraSource.stop()
+                        }, 4000)
                         val deviceAddressSpeaker = scannedValue
-                        val device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice(deviceAddressSpeaker)
+                        val device: BluetoothDevice? =
+                            bluetoothAdapter.getRemoteDevice(deviceAddressSpeaker)
                         device?.let {
-                            if (it.bondState != BluetoothDevice.BOND_BONDED) {
-                                //createBondWithDevice(it)
-                            } else {
-                                runOnUiThread {
-                                    showToast("Bluetooth Already Paired")
-
+                            if (ActivityCompat.checkSelfPermission(
+                                    this@QRActivity,
+                                    Manifest.permission.BLUETOOTH_CONNECT
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                if (it.bondState != BluetoothDevice.BOND_BONDED) {
+                                     createBondWithDevice(it)
                                 }
+                                else
+                                {
+                                   // runOnUiThread { showToast("Bluetooth Already Paired") }
+                                    Log.d("TAG", "receiveDetections: Bluetooth Already Paired")
+                                }
+                            } else {
+                                requestPermissionMySelf()
                             }
                         }
                     }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(this@QRActivity, "value- else", Toast.LENGTH_SHORT).show()
-
-                    }
-
                 }
             }
         })
     }
+
+    private fun createBondWithDevice(device: BluetoothDevice) {
+        if (device.bondState == BluetoothDevice.BOND_NONE)
+        {
+            val bondStateReceiver = object : BroadcastReceiver()
+            {
+                override fun onReceive(context: Context?, intent: Intent)
+                {
+                    val action = intent.action
+                    if (BluetoothDevice.ACTION_BOND_STATE_CHANGED == action)
+                    {
+                        val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        val bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR)
+                        val previousBondState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR)
+
+                        when (bondState) {
+                            BluetoothDevice.BOND_BONDED ->
+                                {
+                                    if (ActivityCompat.checkSelfPermission(this@QRActivity, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED)
+                                    {
+                                        val deviceName = device?.name.toString()
+                                        val deviceAddress = device?.address
+                                        runOnUiThread {
+                                            showToast("Paired successfully with ${device?.name}")
+                                        }
+                                        unregisterReceiver(this)
+                                        Prefs.getInstance(this@QRActivity).bluetoothDeviceName = deviceName
+                                        Prefs.getInstance(this@QRActivity).bluetoothDeviceAddress = deviceAddress.toString()
+                                        moveActivity(HomeActivity())
+                                        finishAffinity()
+
+                                    }
+
+
+                            }
+                            BluetoothDevice.BOND_NONE -> {
+                                if (previousBondState == BluetoothDevice.BOND_BONDING) {
+                                    runOnUiThread {
+                                      //  showToast("Pairing with ${device?.name} was failed")
+
+                                    }
+                                }
+                                unregisterReceiver(this) // Clean up receiver once done
+                            }
+                        }
+                    }
+                }
+            }
+            val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+            registerReceiver(bondStateReceiver, filter)
+            if (ActivityCompat.checkSelfPermission(this,Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED )
+            { device.createBond() }
+        }
+    }
+
+
+
 }

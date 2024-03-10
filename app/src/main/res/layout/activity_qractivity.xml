@@ -52,35 +52,49 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent">
 
+
+
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/mScan"
+            android:id="@+id/mUnpairDevices"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_round4"
+            android:fontFamily="@font/rubrik_extra_light"
             android:gravity="center"
-            android:text="Scan any QR code to pay"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:text="Unpair Devices"
             android:textColor="@color/white"
-            android:textSize="16sp"
+            android:textSize="12sp"
             app:fontFamily="@font/poppins_medium"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:layout_editor_absoluteY="16dp" />
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+
+
+
+
+
+
+
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/mDesc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Google Pay * PhonePePayTm * UPI"
+            android:text="Placed QR Code at the center of Device"
             android:textColor="@color/white"
+            android:layout_marginTop="10dp"
             android:textSize="14sp"
             app:fontFamily="@font/poppins_regular"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mScan"
+            app:layout_constraintTop_toBottomOf="@+id/mUnpairDevices"
             tools:layout_editor_absoluteY="16dp" />
 
         <View

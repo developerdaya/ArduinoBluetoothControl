@@ -26,13 +26,13 @@
         android:theme="@style/Theme.BMSAnalyser"
         tools:targetApi="31">
         <activity
-            android:name=".util.TempActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.splash.SplashActivity"
             android:exported="true"
             android:screenOrientation="portrait">
-
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ui.settings.SettingsActivity"
@@ -42,15 +42,12 @@
             android:name=".ui.qrScanner.QRActivity"
             android:exported="true"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
         </activity>
         <activity
             android:name=".ui.home.HomeActivity"
             android:exported="true"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

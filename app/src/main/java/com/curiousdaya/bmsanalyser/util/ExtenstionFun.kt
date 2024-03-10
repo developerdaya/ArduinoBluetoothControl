@@ -33,18 +33,7 @@ fun Activity.showToast(msg:String){
 
 
 
-fun AppCompatActivity.delayMove(){
-   Handler().postDelayed({
-      val intent = Intent(this, QRActivity::class.java)
-      startActivity(intent)
-      overridePendingTransition(
-         androidx.appcompat.R.anim.abc_fade_in,
-         androidx.appcompat.R.anim.abc_fade_out
-      )
-   },1500
-   )
 
-}
 
 
 fun Activity.fullScreen(){

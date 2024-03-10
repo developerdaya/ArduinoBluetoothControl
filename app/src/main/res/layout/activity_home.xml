@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient"
+    android:background="#4E586C"
     tools:context=".ui.home.HomeActivity">
 
 
@@ -24,13 +24,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/ic_settings"
+        android:id="@+id/logout_icon"
         android:layout_width="40sp"
         android:layout_height="40sp"
         android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/scanQrCode"
-        app:srcCompat="@drawable/ic_settings" />
+        app:srcCompat="@drawable/logout_icon" />
 
 
     <androidx.appcompat.widget.AppCompatImageView
